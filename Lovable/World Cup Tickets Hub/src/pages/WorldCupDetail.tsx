@@ -299,13 +299,17 @@ const WorldCupDetail: React.FC = () => {
                                   )}
                                 </span>
                                 {p.goals && p.goals > 0 && (
-                                  <span className="flex items-center gap-1">
+                                  <span className="flex items-center gap-0.5">
                                     {Array.from({ length: p.goals }).map((_, gIdx) => (
                                       <span
                                         key={gIdx}
-                                        className="w-2.5 h-2.5 rounded-full bg-green-500"
+                                        className="text-base leading-none"
                                         title={`Gol${p.goals! > 1 ? ` ${gIdx + 1}` : ''}${p.ownGoal ? ' contra' : ''}`}
-                                      />
+                                        aria-label="Gol marcado"
+                                        role="img"
+                                      >
+                                        ⚽
+                                      </span>
                                     ))}
                                   </span>
                                 )}
@@ -317,8 +321,8 @@ const WorldCupDetail: React.FC = () => {
                     })}
                   </div>
                   <div className="mt-4 text-xs text-muted-foreground flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
-                    <span>Bolinha verde indica gol marcado pelo jogador na final</span>
+                    <span aria-hidden>⚽</span>
+                    <span>Bola ao lado do nome indica gol marcado pelo jogador na final</span>
                   </div>
                 </CardContent>
               </Card>
