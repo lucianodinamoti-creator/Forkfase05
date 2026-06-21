@@ -509,7 +509,9 @@ Agora que o front tem o **domínio definitivo**, libere-o no backend:
 
 - `app-prd-tk-bend-cin-001` → **App settings** → `FRONTEND_URL` = `https://www.<seu-domínio>` → **Apply** (reinicia sozinho).
 
-> 💡 Enquanto o domínio não estava pronto, dava para deixar `FRONTEND_URL=*` (libera tudo). Agora fixamos no **domínio real** — mais seguro.
+> 🚨 **NÃO coloque barra `/` no final** (nem caminho) — é o erro mais comum aqui. O navegador manda o `Origin` como `https://seu-dominio` (**sem** `/`), e o backend compara a **string exata**: `https://seu-dominio/` **≠** `https://seu-dominio` → o CORS bloqueia e **cadastro/login falham só no navegador** (por `curl`/Postman funciona, porque não mandam `Origin` — o que confunde o diagnóstico). Use `https://tickets.tfteccloudlabs.cloud`, **nunca** `https://tickets.tfteccloudlabs.cloud/`.
+
+> 💡 Enquanto o domínio não estava pronto, dava para deixar `FRONTEND_URL=*` (libera tudo). Agora fixamos no **domínio real** — mais seguro. **Vários domínios?** Separe por vírgula, **todos sem `/`**: `https://dominio-a,https://dominio-b`.
 
 #### 4.7 Testar o front novo
 
@@ -811,6 +813,7 @@ Ao privatizar, duas tarefas mudam — e isso é **esperado**:
 | **DMS** falha ao conectar no source/target (Fase 5) | SHIR não registrado, ou firewall do Azure SQL bloqueia o IP da `vm-data` | Confirme o **nó do SHIR** ✅ no DMS (Integration runtime); libere o IP de saída da `vm-data` no firewall do Azure SQL; logins `db_datareader` (origem) / `sqladmin` (destino) |
 | **DMS** — `Next` indisponível ao selecionar tabelas (Fase 5) | Destino vazio e **"Migrate Missing schema"** não marcado | Marque **Migrate Missing schema** (5.4) — sem tabelas no destino, o DMS exige a migração de schema para prosseguir |
 | Domínio customizado **não valida** | Registro `asuid` TXT/CNAME não propagou | `Resolve-DnsName asuid.www.<domínio> -Type TXT -Server 8.8.8.8`; aguarde a propagação e revalide |
+| **Cadastro/login falham só no navegador** ("não foi possível criar a conta" / 500), mas **`curl` funciona** | **CORS:** `FRONTEND_URL` não bate com o `Origin` do navegador — quase sempre **barra `/` no fim** ou o domínio faltando | Ajuste `FRONTEND_URL` para `https://seu-dominio` **sem `/`** (4.6); `curl` engana porque não manda `Origin` |
 | **(Fase 8)** `/api/*` dá **502/timeout** após desligar o público da API | Front sem **Route All**, ou zona `privatelink.azurewebsites.net` não linkada | Confirme VNet Integration do front + `WEBSITE_VNET_ROUTE_ALL=1` + zona linkada à VNet (8.8) |
 | **(Fase 8)** `/api/health/db` dá **ETIMEOUT** após desligar o público do SQL | API sem VNet Integration/Route All, ou zona `privatelink.database.windows.net` não linkada | Reveja a Fase 8.6 (integração + Route All + zona DNS) |
 | **(Fase 8)** API **não alcança** o Private Endpoint mesmo com tudo certo | Front e API ainda no **mesmo plano** | Confirme a Fase 8.4 — API em `asp-prd-tk-bend-cin-001` (plano separado) |
